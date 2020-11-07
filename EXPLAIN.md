@@ -1,20 +1,16 @@
+## The Gist of It
+Layers and layers of macros that implement a lispy version of the FORTH programming language, the internals of which are completely ridiculous.
+
 ### Utilities
 The file starts with a few utility functions.
 
-'macro!' offers the non-splicing complement to `^` in 'macro'.
+'macro!' offers the non-splicing complement to `^` in 'macro'. NOTE - this has nothing to do with the impressive `defmacro!` from Let Over Lambda.
 ```
 : (macro! (let X _(+ 2 3) (* X X))) )
 -> 25
 ```
-```
-: (macro!
-     (macro!
-        (let X _'_(+ 3 _(+ 4 5)) X) ) ) )
--> 12
-```
-
-'groups-of' ('group' from PG's On Lisp) and 'flat' (the PicoLisp version of
-'flatten' from On Lisp) are pretty self explanatory.
+`groups-of` (`group` from PG's On Lisp) and `flat` (the PicoLisp version of
+`flatten` from On Lisp) are pretty self explanatory.
 ```
 : (groups-of 2 '(1 2 3 4 5 6))
 -> ((1 2) (3 4) (5 6))
@@ -31,10 +27,47 @@ read macro from Let Over Lambda.
         (do-something) ) )
 -> (let (A 1 B 2 C 3) (do something))
 ```
-
+While this is a contrived and convoluted example, `\\` allows some very cool techniques when building LOLFORTH.
 
 ### Dlambda
 `d!` is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
+```
+: (def 'D (d! ("add" (X Y) (+ X Y)) ("sub" (X Y) (- X Y))))
+-> D
+```
+The `d!` macro creates dispatching functions by "expanding" into a case statement.
+```
+: (pretty D)
+->  ("Args"
+      (case (car "Args")
+         ("add"
+            ... )
+         ("sub"
+            ... ) ) )
+```
+When called with "add" it calls the matching function with the supplied arguments.
+```
+: (D "add" 2 3)
+-> 5
+```
+Same for "sub".
+```
+: (D "sub" 16 9)
+-> 7
+```
+`d!` also inherits the default clause `T` from the `case` statement.
+```
+: (def 'D (d! ("supercool" () "Wow, dlambda functions are super cool!") (T () "No arguments. Boring.")))
+# D redefined
+-> D
+
+: (D "supercool")
+-> "Wow, dlambda functions are super cool!"
+
+: (D)
+-> "No arguments. Boring"
+```
+
 
 ### Pandoric Macros
 The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
