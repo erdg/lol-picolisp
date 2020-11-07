@@ -1,3 +1,4 @@
+### Utilities
 The file starts with a few utility functions.
 
 'macro!' offers the non-splicing complement to `^` in 'macro'.
@@ -32,7 +33,10 @@ read macro from Let Over Lambda.
 ```
 
 
+### Dlambda
 'd!' is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
 
 ### Pandoric Macros
 'p!' is [plambda](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
+
+### LOLFORTH
