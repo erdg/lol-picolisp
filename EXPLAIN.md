@@ -37,6 +37,19 @@ read macro from Let Over Lambda.
 'd!' is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
 
 ### Pandoric Macros
-'p!' is [plambda](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
+The Pandoric Macros were some of my favorite from Let Over Lambda. They are detailed
+[here](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
+
+'p!' is 'plambda'
+
+'with-p!' is 'with-pandoric'
+
+'with-p!s' is an extension of 'with-pandoric' that takes the concept of
+"anaphor capture and injection" to the next level.
+
+'pm' is 'defpan'.
+
+'typ!' is a macro-writing macro that allows to create new types of pandoric objects. This was my own creation and really puts
+the "LOL" in "LOLFORTH".
 
 ### LOLFORTH
