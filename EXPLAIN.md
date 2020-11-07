@@ -14,7 +14,7 @@ The file starts with a few utility functions.
 ```
 
 'groups-of' ('group' from PG's On Lisp) and 'flat' (the PicoLisp version of
-PG's 'flatten' from On Lisp) are pretty self explanatory.
+'flatten' from On Lisp) are pretty self explanatory.
 ```
 : (groups-of 2 '(1 2 3 4 5 6))
 -> ((1 2) (3 4) (5 6))
@@ -34,22 +34,26 @@ read macro from Let Over Lambda.
 
 
 ### Dlambda
-'d!' is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
+`d!` is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
 
 ### Pandoric Macros
-The Pandoric Macros were some of my favorite from Let Over Lambda. They are detailed
-[here](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
+The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
+are some of my favorite from Let Over Lambda.
 
-'p!' is 'plambda'
+> The idea behind [the Pandoric Macros] is to _open closures_, allowing their otherwise closed-over lexical variables to be accessed externally.
+>
+> -- Let Over Lambda (p. 189)
 
-'with-p!' is 'with-pandoric'
+`p!` is `plambda`
 
-'with-p!s' is an extension of 'with-pandoric' that takes the concept of
+`with-p!` is `with-pandoric`
+
+`with-p!s` is an extension of `with-pandoric` that takes the concept of
 "anaphor capture and injection" to the next level.
 
-'pm' is 'defpan'.
+`pm` is `defpan`.
 
-'typ!' is a macro-writing macro that allows to create new types of pandoric objects. This was my own creation and really puts
-the "LOL" in "LOLFORTH".
+`typ!` is a macro-writing macro that allows to create new types of pandoric
+objects. This was my own creation and really puts the "LOL" in "LOLFORTH".
 
 ### LOLFORTH
