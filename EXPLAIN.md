@@ -193,6 +193,14 @@ In case you haven't read the entirety of On Lisp and Let Over Lambda, here's the
 >
 > -- On Lisp (p. 189-190)
 
+Don't be afraid - as PicoLisp programmers, we are used to anaphora in our programs! `@` serves as an anaphor for many of the flow and logic functions. In most cases, the `@` result can be translated to English as "it."
+```
+   # read a file line by line
+   (in "file.txt"
+      (while (line)        # is there another line?
+         (process @) ) )   # process _it_
+```
+
 So `with-p!` captures the symbols `Self` and `setp`, and binds them to the current plambda form and `setp` function, respectively, so they can be used as pronouns (and verbs).
 
 >#### another note on implementation differences
