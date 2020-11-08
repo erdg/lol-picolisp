@@ -115,10 +115,57 @@ PicoLisp and Common Lisp are very different languages. Due to the differences of
 ### plambda
 `p!` is the PL translation of `plambda`. A 'plambda' is basically a "dlambda with state", with a little "interclosure protocol" bolted on.
 ```
-(de ptest1 @
+# two different ways to p!
+
+# as a read macro within a @-args function
+: (de ptest1 @
    `(let Cnt 0
-      (p! (X) (Cnt) (inc 'Cnt X)) ) )
+      (p! (X) (Cnt)
+         (inc 'Cnt X) ) ) )
+-> ptest1
+
+# as an anonymous p!... unless you name it with 'def' or 'setq'
+: (setq ptest2
+   (let Cnt 0
+      (*p! (X) (Cnt)
+         (inc 'Cnt X) ) ) )
+-> (@ (job '((Cnt . 0)) ( ... )))  # what the what?!
+
+: (pretty ptest2)
+-> (@ ...)
 ```
+A `p!` form is a simply a @-args function (closure?) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the 'p!' function (`This` anaphor, captured by `p!` during `job` environment creation) to the arguments it was passed.
+```
+: (do 3 (ptest1 3))
+-> 9
+
+: (do 2 (ptest2 13))
+-> 26
+
+: (ptest1 "getp" 'Cnt)
+-> 9
+
+: (ptest2 "setp" 'Cnt 8)
+-> 8
+
+: (ptest2 3)
+-> 11
+
+: (ptest2 "getp" 'Cnt)
+-> 11
+
+: (ptest2 "getp" 'This)
+-> ((X) (inc 'Cnt X))
+
+# recode the function
+: (ptest2 "setp" 'This '((X) (dec 'Cnt X)))
+-> ((X) (dec 'Cnt X))
+
+# now it decrements the count
+: (ptest2 3)
+-> 8
+```
+
 
 #### with-p!
 `with-p!` is `with-pandoric`
