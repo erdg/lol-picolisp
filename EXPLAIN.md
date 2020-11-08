@@ -101,8 +101,6 @@ We could imagine making a counter as a "dlambda with state". This can be done by
 -> 0
 ```
 
-This brings us to...
-
 ### The Pandoric Macros
 The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
 are some of my favorite from Let Over Lambda.
@@ -111,15 +109,25 @@ are some of my favorite from Let Over Lambda.
 >
 > -- Let Over Lambda (p. 189)
 
+##### a note on implementation differencs
+PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we must use PicoLisp's `job` environments to mimic lexical scope with indefinate extent as found in Common Lisp. But when it comes down to it, both `plambda` and `p!` create reusable chunks of code with lexical variables that can be exported to the global environment and consumed as needed via `with-pandoric` / `with-p!` and `with-p!s`.
+
+
+#### plambda
 `p!` is `plambda`
 
+#### with-p!
 `with-p!` is `with-pandoric`
 
+
+#### with-p!s
 `with-p!s` is an extension of `with-pandoric` that takes the concept of
 "anaphor capture and injection" to the next level.
 
+#### pm
 `pm` is `defpan`.
 
+#### typ!
 `typ!` is a macro-writing macro that allows to create new types of pandoric
 objects. This was my own creation and really puts the "LOL" in "LOLFORTH".
 
