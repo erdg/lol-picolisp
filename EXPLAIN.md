@@ -102,18 +102,19 @@ We could imagine making a counter as a "dlambda with state". This can be done by
 ```
 
 ### The Pandoric Macros
-The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
-are some of my favorite from Let Over Lambda.
-
 > The idea behind [the Pandoric Macros] is to _open closures_, allowing their otherwise closed-over lexical variables to be accessed externally.
 >
 > -- Let Over Lambda (p. 189)
 
-#### a note on implementation differencs
-PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we must use PicoLisp's `job` environments to mimic lexical scope with indefinate extent as found in Common Lisp. But when it comes down to it, both `plambda` and `p!` create reusable chunks of code with lexical variables that can be exported to the global environment and consumed as needed via `with-pandoric` / `with-p!` and `with-p!s`.
+The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
+are some of my favorite from Let Over Lambda.
 
 ### plambda
 `p!` is the PL translation of `plambda`. A 'plambda' is basically a "dlambda with state", with a little "interclosure protocol" bolted on.
+
+>#### a note on implementation differences
+>PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we must use PicoLisp's `job` environments to mimic lexical scope with indefinate extent, as found in Common Lisp. But when it comes down to it, both `plambda` and `p!` create reusable chunks of code with lexical variables that can be exported to the global environment and consumed as needed via `with-pandoric` / `with-p!` and `with-p!s`. Also note that `:keywords` are used in Common Lisp to dispatch different plamda actions. PicoLisp doesn't have those, so transient symbols are used instead, eg. `"keyword"`.
+
 ```
 # two different ways to p!
 
@@ -134,7 +135,7 @@ PicoLisp and Common Lisp are very different languages. Due to the differences of
 : (pretty ptest2)
 -> (@ ...)
 ```
-A `p!` form is a simply a @-args function (closure?) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the 'p!' function (`This` anaphor, captured by `p!` during `job` environment creation) to the arguments it was passed.
+A `p!` form is a simply a `@`-args function (closure?) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the 'p!' function (`This` anaphor, captured by `p!` during `job` environment creation) to the arguments it was passed.
 ```
 : (do 3 (ptest1 3))
 -> 9
@@ -166,9 +167,36 @@ A `p!` form is a simply a @-args function (closure?) that contains a `job` envir
 -> 8
 ```
 
+### with-p!
+`with-p!` is the PL translation of `with-pandoric`. `with-p!` allows to access variables within a p! environment/closure.
+```
+: (with-p! (Cnt) ptest2
+   (setp Cnt 37) )
+-> 37
 
-#### with-p!
-`with-p!` is `with-pandoric`
+: (ptest2 4)
+-> 33
+
+# recode function from anywhere
+: (with-p! (This) ptest2
+   (setp This '((X Y) (inc 'Cnt (* X Y)))) )  # increment count by product of two numbers
+-> ((X Y) (inc 'Cnt (* X Y)))
+
+: (ptest 4 5)
+-> 53
+```
+`with-p!` is a PL `macro` that "expands" into a `let` statement. The let-bindings are created by `with-p!-env`. `with-p!-env` uses the `make` / `link` PL idiom to build a list of variables gathered from the supplied plambda form. `with-p!-env` also injects the anaphors `Self` and `setp` so we can conveniently access and modify the plambda closure.
+
+In case you haven't read the entirety of On Lisp and Let Over Lambda, here's the crash course in Anaphora.
+
+>In natural language, an anaphor is an expression which refers back in the conversation. The most common anaphor in English is probably “it,” as in “Get the wrench and put it on the table.” Anaphora are a great convenience in everyday language [...] but they don’t appear much in programming languages. For the most part, this is good. Anaphoric expressions are often genuinely ambiguous, and present-day programming languages are not designed to handle ambiguity.  However, it is possible to introduce a very limited form of anaphora into Lisp programs without causing ambiguity. An anaphor, it turns out, is a lot like a captured symbol. We can use anaphora in programs by designating certain symbols to serve as pronouns, and then writing macros intentionally to capture these symbols.
+> -- On Lisp (p. 189-190)
+
+So `with-p!` captures the symbols `Self` and `setp`, and binds them to the current plambda form and `setp` function, respectively, so they can be used as pronouns (and verbs).
+
+>#### another note on implementation differences
+>In Let Over Lambda the `Self` anaphor is captured by the `plambda` macro, as opposed to the PL version where it's captured by the `with-p!` macro. The treatment of pandoric variables is very different between the two versions. In Let Over Lambda, `defsetf` and `setf` are used to set generalized  variables. This doesn't make sense for PicoLisp, so `setp` was created.
+
 
 
 #### with-p!s
