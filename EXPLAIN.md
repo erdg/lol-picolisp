@@ -109,12 +109,16 @@ are some of my favorite from Let Over Lambda.
 >
 > -- Let Over Lambda (p. 189)
 
-##### a note on implementation differencs
+#### a note on implementation differencs
 PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we must use PicoLisp's `job` environments to mimic lexical scope with indefinate extent as found in Common Lisp. But when it comes down to it, both `plambda` and `p!` create reusable chunks of code with lexical variables that can be exported to the global environment and consumed as needed via `with-pandoric` / `with-p!` and `with-p!s`.
 
-
-#### plambda
-`p!` is `plambda`
+### plambda
+`p!` is the PL translation of `plambda`. A 'plambda' is basically a "dlambda with state", with a little "interclosure protocol" bolted on.
+```
+(de ptest1 @
+   `(let Cnt 0
+      (p! (X) (Cnt) (inc 'Cnt X)) ) )
+```
 
 #### with-p!
 `with-p!` is `with-pandoric`
