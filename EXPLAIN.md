@@ -4,11 +4,13 @@ Layers and layers of macros that implement a lispy version of the FORTH programm
 ### Utilities
 The file starts with a few utility functions.
 
-'macro!' offers the non-splicing complement to `^` in 'macro'. NOTE - this has nothing to do with the impressive `defmacro!` from Let Over Lambda.
+'macro!' offers a non-splicing complement to `^` in 'macro'. NOTE - this has nothing to do with the impressive `defmacro!` from Let Over Lambda.
 ```
 : (macro! (let X _(+ 2 3) (* X X))) )
 -> 25
 ```
+It uses a naive code walker to look for underscore characters and insert the result of evaluating the following list in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but it was `list`ed, so the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure make the code look sweet though lol.
+
 `groups-of` (`group` from PG's On Lisp) and `flat` (the PicoLisp version of
 `flatten` from On Lisp) are pretty self explanatory.
 ```
@@ -27,7 +29,7 @@ read macro from Let Over Lambda.
         (do-something) ) )
 -> (let (A 1 B 2 C 3) (do something))
 ```
-While this is a contrived and convoluted example, `\\` allows some very cool techniques when building LOLFORTH.
+While this is a convoluted example for such a simple result, `\\` allows some very cool techniques used in LOLFORTH later.
 
 ### Dlambda
 `d!` is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
@@ -45,7 +47,7 @@ The `d!` macro creates dispatching functions by "expanding" into a case statemen
          ("sub"
             ... ) ) )
 ```
-When called with "add" it calls the matching function with the supplied arguments.
+When called with "add" it dispatches the matching function with the supplied arguments.
 ```
 : (D "add" 2 3)
 -> 5
