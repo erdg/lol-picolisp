@@ -128,7 +128,7 @@ are some of my favorite from Let Over Lambda.
    (let Cnt 0
       (*p! (X) (Cnt)
          (inc 'Cnt X) ) ) )
--> (@ (job '((Cnt . 0)) ( ... )))  # what the what?!
+-> (@ (job '((Cnt . 0) ...) ( ... )))  # what the what?!
 
 : (pretty ptest2)
 -> (@ ...)
@@ -187,7 +187,8 @@ A `p!` form is a simply a `@`-args function (closure?) that contains a `job` env
 
 In case you haven't read the entirety of On Lisp and Let Over Lambda, here's the crash course in Anaphora.
 
->In natural language, an anaphor is an expression which refers back in the conversation. The most common anaphor in English is probably “it,” as in “Get the wrench and put it on the table.” Anaphora are a great convenience in everyday language [...] but they don’t appear much in programming languages. For the most part, this is good. Anaphoric expressions are often genuinely ambiguous, and present-day programming languages are not designed to handle ambiguity.  However, it is possible to introduce a very limited form of anaphora into Lisp programs without causing ambiguity. An anaphor, it turns out, is a lot like a captured symbol. We can use anaphora in programs by designating certain symbols to serve as pronouns, and then writing macros intentionally to capture these symbols.
+> In natural language, an anaphor is an expression which refers back in the conversation. The most common anaphor in English is probably “it,” as in “Get the wrench and put it on the table.” Anaphora are a great convenience in everyday language [...] but they don’t appear much in programming languages. For the most part, this is good. Anaphoric expressions are often genuinely ambiguous, and present-day programming languages are not designed to handle ambiguity.
+> However, it is possible to introduce a very limited form of anaphora into Lisp programs without causing ambiguity. An anaphor, it turns out, is a lot like a captured symbol. We can use anaphora in programs by designating certain symbols to serve as pronouns, and then writing macros intentionally to capture these symbols.
 > -- On Lisp (p. 189-190)
 
 So `with-p!` captures the symbols `Self` and `setp`, and binds them to the current plambda form and `setp` function, respectively, so they can be used as pronouns (and verbs).
