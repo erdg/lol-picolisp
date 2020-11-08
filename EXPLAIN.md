@@ -208,7 +208,7 @@ So `with-p!` captures the symbols `Self` and `setp`, and binds them to the curre
 
 `setp` serves as the pandoric complement to `setq`.
 
-`setp`, the symbol captured by `with-p!`, is, as far as I can tell, the PicoLisp equivalent of a symbol-macro, like those created in Common Lisp with `symbol-macrolet`. If we look at the code for `with-p!-env`, the symbol `setp` is bound to a literal copy of a function `set-with-p!`. Looking at the code for `set-with-p!`, we can see that it is a macro that "expands" to a `(Self "setp" ...)` call. Remember that `Self` is the anaphor for the current plambda closure of `with-p!`. 
+`setp`, the symbol captured by `with-p!`, is, as far as I can tell, the PicoLisp equivalent of a symbol-macro, like those created in Common Lisp with `symbol-macrolet`. If we look at the code for `with-p!-env`, the symbol `setp` is bound to a literal copy of a function `set-with-p!`. Looking at the code for `set-with-p!`, we can see that it is a macro that "expands" to a `(Self "setp" ...)` call. Remember that `Self` is the anaphor for the current plambda closure of `with-p!`.
 
 Something like the following happens as we descend through the layers of macros.
 ```
@@ -235,7 +235,7 @@ Something like the following happens as we descend through the layers of macros.
 
    (set 'Cnt 37)
 ```
-   
+
 Note that because `setp` expects the anaphor `Self` to be in its calling environment, it can only be used within `with-p!` (and `with-p!s`) forms.
 
 ### with-p!s
@@ -270,12 +270,88 @@ Note that because `setp` expects the anaphor `Self` to be in its calling environ
 : (ptest2 1)            # increment conte of ptest2
 -> 60
 ```
+Like `with-p!` and `with-p!-env`, the heavy lifting for `with-p!s` is done by the function `with-p!s-env`. `with-p!s-env` processes its args to create a giant let binding with a bunch of handy anaphors included. It mostly serves as an example of what can be done with anaphors and how we can use lisp to create our own programming constructs with any behavior we can imagine. The `with-p!s-env` source code has helpful comments, if you're interested in the specifics of the implementation.
 
-#### pm
-`pm` is `defpan`.
 
-#### typ!
-`typ!` is a macro-writing macro that allows to create new types of pandoric
-objects. This was my own creation and really puts the "LOL" in "LOLFORTH".
+### pm
+Let's be real here - underneath the plambdas and the macros and the anaphora, what we're really doing is creating yet another way of object oriented programming in lisp. Just what the world needs! Let's take it all the way.
+
+`pm` is the PL translation `defpan`. It allows to define pandoric methods that operate on any plambda closure that exposes the right variables. Let's say we have an important calculation that needs to be periodically done on our counters.
+```
+: (pm important-calculation () (Cnt) (* Cnt 7))
+-> important-calculation
+
+: (important-calculation ptest1)
+-> 210
+
+: (important-calculation ptest2)
+-> 420
+```
+Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form. Note that `pm` is not a true nested macro because the inner `macro` call is evaluated when it is placed  in the outer `macro`s "expansion".
+
+### typ!
+`typ!` allows to create new (proto)types of pandoric objects.
+```
+# the canonical "shapes" example
+: (typ! p-rectangle
+      X Y DX DY )
+-> p-rectangle
+```
+`typ!` is a macro-writing macro. Behold the awe-inspiring nested macros in the definition! :exploding_head: `typ!` calls expand into `de` call that is itself a `macro` that, when called, will expand into a plambda form with all the variable slots filled in. This becomes clear when we look at the expansion of the above `(typ! p-rectangle ...)` call.
+```
+   # 'typ!' expansion
+   (de p-rectangle (X Y DX DY)
+      (macro!
+         (let [X  _ X      # coords
+               Y  _ Y
+               DX _ DX     # width
+               DY _ DY]    # height
+            (*p! () (X Y DX DY))) ) )
+```
+So now we a function `p-rectangle` that when called, creates a rectangle object (which is really just a plambda form). Let's create a p-rectangle.
+```
+: (def 'pr1 (p-rectangle 0 0 5 10))
+-> pr1
+```
+This call expands into -
+```
+   (def 'pr1
+      (let [X 0 Y 0 DX 5 DY 10]
+         (*p! () (X Y DX DY)) ) )
+```
+a plambda form (with no `This` function). We can add p-rectangle methods with `pm`.
+```
+: (pm coords () (X Y)
+   (list X Y) )
+-> coords
+
+# NOTE - 'setp' and 'self' are available in 'pm' methods
+# because 'pm' is just a wrapper over 'with-p!'
+: (pm move (A B) (X Y)
+   (prog
+      (setp X (+ X A))
+      (setp Y (+ Y B))
+      (coords Self) ) )
+-> move
+
+: (pm area () (DX DY)
+   (* DX DY) )
+-> area
+
+: (pm perimeter () (DX DY)
+   (* 2 (+ DX DY)) )
+-> perimeter
+```
+And now we can play with pandoric rectangles!
+```
+: (move pr1 7 8)
+-> (7 8)
+
+: (move pr1 3 -9)
+-> (10 -1)
+
+: (area pr1)
+-> 50
+```
 
 ### LOLFORTH
