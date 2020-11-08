@@ -50,13 +50,11 @@ The `d!` macro creates dispatching functions by "expanding" into a case statemen
          ("sub"
             ... ) ) )
 ```
-When called with "add" it dispatches the matching function with the supplied arguments.
+When called with a `"keyword"` it dispatches the matching function with the supplied arguments.
 ```
 : (D "add" 2 3)
 -> 5
-```
-Same for "sub".
-```
+
 : (D "sub" 16 9)
 -> 7
 ```
@@ -197,10 +195,21 @@ So `with-p!` captures the symbols `Self` and `setp`, and binds them to the curre
 >#### another note on implementation differences
 >In Let Over Lambda the `Self` anaphor is captured by the `plambda` macro, as opposed to the PL version where it's captured by the `with-p!` macro. The treatment of pandoric variables is very different between the two versions. In Let Over Lambda, `defsetf` and `setf` are used to set generalized  variables. This doesn't make sense for PicoLisp, so `setp` was created.
 
+`setp` serves as the pandoric complement to `setq`
 
+`setp`, the symbol captured by `with-p!`, is, as far as I can tell, is the PicoLisp equivalent of a symbol-macro, like those created in Common Lisp with `symbol-macrolet`. If we look at the code for `with-p!-env`, the symbol `setp` is bound to a literal copy of a function `set-with-p!`. Looking at the code for `set-with-p!`, we can see that it is a macro that "expands" to a `(Self "setp" ...)` call. Remember that `Self` is the anaphor for the current plambda closure of `with-p!`. So the above
+```
+   (with-p! (Cnt) ptest2
+      (setp Cnt 37) )
+```
+is eventually executed as
+```
+   (ptest2 "setp" 'Cnt 37)
+```
+Note that because `setp` needs the anaphor `Self` to be in its "expansion", it can only be used within `with-p!` (and `with-p!s`) forms.
 
 #### with-p!s
-`with-p!s` is an extension of `with-pandoric` that takes the concept of
+`with-p!s` is an extension of `with-p!` that takes the concept of
 "anaphor capture and injection" to the next level.
 
 #### pm
