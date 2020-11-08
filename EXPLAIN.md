@@ -9,7 +9,7 @@ The file starts with a few utility functions.
 : (macro! (let X _(+ 2 3) (* X X))) )
 -> 25
 ```
-It uses a naive code walker to look for underscore characters and insert the result of evaluating the following list in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but it was `list`ed, so the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure make the code look sweet though lol.
+It uses a naive code walker to look for underscore characters and insert the result of evaluating the following list in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but it was `list`ed, so the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though lol.
 
 `groups-of` (`group` from PG's On Lisp) and `flat` (the PicoLisp version of
 `flatten` from On Lisp) are pretty self explanatory.
@@ -34,13 +34,16 @@ While this is a convoluted example for such a simple result, `\\` allows some ve
 ### Dlambda
 `d!` is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
 ```
-: (def 'D (d! ("add" (X Y) (+ X Y)) ("sub" (X Y) (- X Y))))
+: (def 'D
+   (d!
+      ("add" (X Y) (+ X Y))
+      ("sub" (X Y) (- X Y)) ) )
 -> D
 ```
 The `d!` macro creates dispatching functions by "expanding" into a case statement.
 ```
 : (pretty D)
-->  ("Args"
+-> ("Args"
       (case (car "Args")
          ("add"
             ... )
@@ -59,7 +62,10 @@ Same for "sub".
 ```
 `d!` also inherits the default clause `T` from the `case` statement.
 ```
-: (def 'D (d! ("supercool" () "Wow, dlambda functions are super cool!") (T () "No arguments. Boring.")))
+: (def 'D
+   (d!
+      ("supercool" () "Wow, dlambda functions are super cool!")
+      (T () "No arguments. Boring.") ) )
 # D redefined
 -> D
 
@@ -70,8 +76,34 @@ Same for "sub".
 -> "No arguments. Boring"
 ```
 
+We could imagine making a counter as a "dlambda with state". This can be done by wrapping the dlambda in a `job` environment.
+```
+: (de d!-with-state @
+   (job '((Cnt . 0))
+      (macro  # apply dlambda to rest args
+         ((d!
+            ("inc" (X) (inc 'Cnt X))
+            ("dec" (X) (dec 'Cnt X))
+            ("reset" () (zero Cnt)) )
+          ^(rest) ) ) ) )
+-> d!-with-state
 
-### Pandoric Macros
+(d!-with-state "inc" 7)
+-> 7
+
+(d!-with-state "inc" 3)
+-> 10
+
+(d!-with-state "dec" 5)
+-> 5
+
+(d!-with-state "reset")
+-> 0
+```
+
+This brings us to...
+
+### The Pandoric Macros
 The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
 are some of my favorite from Let Over Lambda.
 
