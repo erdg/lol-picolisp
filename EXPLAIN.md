@@ -198,7 +198,7 @@ Don't be afraid - as PicoLisp programmers, we are used to anaphora in our progra
    # read a file line by line
    (in "file.txt"
       (while (line)        # is there another line?
-         (process @) ) )   # process *it*
+         (process @) ) )   # process it
 ```
 
 So `with-p!` captures the symbols `Self` and `setp`, and binds them to the current plambda form and `setp` function, respectively, so they can be used as pronouns (and verbs).
@@ -208,15 +208,34 @@ So `with-p!` captures the symbols `Self` and `setp`, and binds them to the curre
 
 `setp` serves as the pandoric complement to `setq`.
 
-`setp`, the symbol captured by `with-p!`, is, as far as I can tell, the PicoLisp equivalent of a symbol-macro, like those created in Common Lisp with `symbol-macrolet`. If we look at the code for `with-p!-env`, the symbol `setp` is bound to a literal copy of a function `set-with-p!`. Looking at the code for `set-with-p!`, we can see that it is a macro that "expands" to a `(Self "setp" ...)` call. Remember that `Self` is the anaphor for the current plambda closure of `with-p!`. So the above
+`setp`, the symbol captured by `with-p!`, is, as far as I can tell, the PicoLisp equivalent of a symbol-macro, like those created in Common Lisp with `symbol-macrolet`. If we look at the code for `with-p!-env`, the symbol `setp` is bound to a literal copy of a function `set-with-p!`. Looking at the code for `set-with-p!`, we can see that it is a macro that "expands" to a `(Self "setp" ...)` call. Remember that `Self` is the anaphor for the current plambda closure of `with-p!`. 
+
+Something like the following happens as we descend through the layers of macros.
 ```
    (with-p! (Cnt) ptest2
       (setp Cnt 37) )
-```
-is eventually executed as
-```
+
+   # 'with-p!' captures 'Self', so the 'setp' symbol-macro expands into
+
+   (Self "setp" 'Cnt 37)
+
+   # which is a regular plambda call
+
    (ptest2 "setp" 'Cnt 37)
+
+   # which is just a dlambda with state
+
+   ((@ (job '((Cnt . 9) (This . ((X) ...))) (d! ("setp" ...) ...))) (list "setp" 'Cnt 37))
+
+   # which is just a function that dispatches on it args
+
+   (apply '((Sym Val) (set Sym Val)) (list 'Cnt 37))
+
+   # to (in this case) update the state (contained in a 'job' enviroment)
+
+   (set 'Cnt 37)
 ```
+   
 Note that because `setp` expects the anaphor `Self` to be in its calling environment, it can only be used within `with-p!` (and `with-p!s`) forms.
 
 ### with-p!s
