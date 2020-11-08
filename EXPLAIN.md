@@ -313,7 +313,7 @@ So now we a function `p-rectangle` that when called, creates a rectangle object 
 : (def 'pr1 (p-rectangle 0 0 5 10))
 -> pr1
 ```
-This call expands into -
+This call expands into
 ```
    (def 'pr1
       (let [X 0 Y 0 DX 5 DY 10]
@@ -353,5 +353,17 @@ And now we can play with pandoric rectangles!
 : (area pr1)
 -> 50
 ```
+With all the pieces of our new closure / object oriented programming system in place, we're ready to build a toy language.
 
 ### LOLFORTH
+Unfortunately, I'm not going to explain the LOLFORTH implementation as thoroughly as the previous code. The final chapter of [Let Over Lambda](https://letoverlambda.com/) does it better than I ever could. If you've enjoyed this, consider buying Doug's Book. It's super cool. I'll leave you with a teaser quote that offers a brief explanation of the forth programming language. The text has been [tweaked] as needed to reflect the PicoLisp version we are discussing here.
+
+> One of the characteristic features of forth is its direct access to the stack data structures used by your program both to pass parameters to subroutines and to keep track of your execution because - unlike most programming languages - it separates these two uses of the stack data structure into two stack you can fool with. In a typical C implementation, the parameters of a function call and its so-called _return address_ are stored it a single, variable-sized _stack frame_ for every function invocation. In forth, they are two different stacks called the parameter stack and the return stack, which are represented as our abstract registers `pstack` and `rstack`. We use the Common Lisp `push` and `pop` macros, meaning these stacks are implemented with cons cell linked lists [...].
+>
+> The abstract register `pc` is an abbreviation for _program counter_, a pointer to the code we are currently executing. [...]
+>
+> Another building block of forth is its concept of a _dictionary_. The forth dictionary is a singly linked list of forth _words_, which are similar to lisp functions. Words are represented with a [pandoric type via `typ!`]. [...] The [`Name`] slot is for a symbol used to lookup the word in the dictionary. Notice that the forth dictionary is not stored alphabetically, but instead chronologically. When we add new word we append them onto the end of the dictionary so that when we traverse the dictionary the latest defined words are examined first. The last element of our dictionary is always stored in the abstract register `dict`. To traverse the dictionary, we start with `dict` and follow the [`Prev`] pointer of the word structures, which either point to the previously defined word or to [`NIL`] if we are at the last word.
+>
+> -- Let Over Lambda (p. 287-288)
+
+
