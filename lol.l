@@ -12,8 +12,6 @@
       (macro
          ^(_walk @Lst) ) ) )
 
-# (macro!
-
 (de _walk (X)
    (recur (X Acc)
       (ifn X
