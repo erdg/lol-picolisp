@@ -530,7 +530,7 @@ And now for the grand finale!
 1
 -> ok
 ```
-:exploding_head:
+You are now an expert at lisp _and_ forth meta-programming :exploding_head:
 
 There's a bunch of other code that I'll quickly mention. Macros to write forth primitives so we can bootstrap a forth standard library and continue adding new words in forth, some fancy lisp macros to convert lisp functions to forth words so we don't have to do too much work, code to install the primitives and standard library to the forth image, etc.
 
@@ -542,4 +542,4 @@ The best part?
 : (pretty F)
 -> ... another giant wall of spaced out text ...
 ```
-Now scroll up a bit- as mentioned before the _entire_ FORTH system is one giant `job` environment / closure. Even better - the FORTH `dict` is a singly linked list of these 'job' environments / closures. One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl: :rofl: :rofl:
+Now scroll up a bit... and scroll some more - as mentioned before, the _entire_ LOLFORTH system is one giant `job` environment / closure. Even better - the forth `dict` is a singly linked list of these job environments / closures. One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl: :rofl: :rofl:
