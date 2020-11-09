@@ -411,10 +411,10 @@
 # 9
 # -> ok
 #
-(de go-forth ("Forth" . Words)
+(de go-forth ("F" . Words)
    (macro
-      (for W '(^(mapcar '`(\\ '@1) Words))
-         ("Forth" W) ) ) )
+      (for Word '(^(mapcar '`(\\ '@1) Words))
+         ("F" Word) ) ) )
 
  # dummy function to access file to e.g. add new primitives or stdlib words
 (de forth ())
