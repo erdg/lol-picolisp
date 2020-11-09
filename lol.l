@@ -211,8 +211,8 @@
                                  (prog
                                     (link "Sym" (P! "getp" "Sym"))
                                     (queue 'P!T (cons (any (pack "P!" N)) "Sym")) ) ) ) ) )  # (P!1 . X) -> P!Tab
-                     (setq P!Tab (append P!T P!Tab)) ) ) )  # -> '((P!1 . X) (P!1 . Y-1) (P!2 . Y-2) (P!2 . Z))
-            (link 'P!Table (cons 'quote (group P!Tab))) ) ) ) )  # -> '((P!1 X Y-1) (P!2 Y-2 Z))
+                     (setq P!Tab (append P!T P!Tab)) ) ) )  # -> '((P!1 . X) (P!1 . Y$1) (P!2 . Y$2) (P!2 . Z))
+            (link 'P!Table (cons 'quote (group P!Tab))) ) ) ) )  # -> '((P!1 X Y$1) (P!2 Y$2 Z))
 ###
 
 ### setp - modify p!-vars in 'with-p!(s)' forms
