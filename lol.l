@@ -236,10 +236,13 @@
           ^ Rest) ) ) )
 
 (de Var$N->Var (Sym)
-   (cons 'quote
-      (any
-         (caar
-            (split (chop (pack Sym)) "$") ) ) ) )
+   (if (pre? "This" Sym)
+      (cons 'quote 'This)
+      (cons 'quote
+         (any
+            (pack
+               (car
+                  (split (chop (pack Sym)) "$") ) ) ) ) ) )
 ###
 
 # misc abstraction
