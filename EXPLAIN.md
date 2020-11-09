@@ -32,7 +32,12 @@ read macro from Let Over Lambda.
 While this is a convoluted example for such a simple result, `\\` allows some very cool techniques used in LOLFORTH later.
 
 ### Dlambda
-`d!` is [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7)
+> Dlambda is designed to be passed a [transient] symbol as the first argument. Depending on which [transient] symbol was used, dlambda will execute a corresponding piece of code.
+>
+> -- Let Over Lambda (p. 149)
+
+`d!` is the PL translation of [dlambda](https://letoverlambda.com/index.cl/guest/chap5.html#sec_7).
+
 ```
 : (def 'D
    (d!
@@ -108,7 +113,7 @@ The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
 are some of my favorite from Let Over Lambda.
 
 ### plambda
-`p!` is the PL translation of `plambda`. A 'plambda' is basically a "dlambda with state", with a little "interclosure protocol" bolted on.
+`p!` is the PL translation of `plambda`. A plambda is basically a "dlambda with state", with a little "interclosure protocol" bolted on.
 
 >#### a note on implementation differences
 >PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we must use PicoLisp's `job` environments to mimic lexical scope with indefinate extent, as found in Common Lisp. But when it comes down to it, both `plambda` and `p!` create reusable chunks of code with lexical variables that can be exported to the global environment and consumed as needed via `with-pandoric` / `with-p!` and `with-p!s`. Also note that `:keywords` are used in Common Lisp to dispatch different plamda actions. PicoLisp doesn't have those, so transient symbols are used instead, eg. `"keyword"`.
@@ -133,7 +138,7 @@ are some of my favorite from Let Over Lambda.
 : (pretty ptest2)
 -> (@ ...)
 ```
-A `p!` form is a simply a `@`-args function (closure?) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the 'p!' function (`This` anaphor, captured by `p!` during `job` environment creation) to the arguments it was passed.
+A `p!` form is a simply a `@`-args function (closure?) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the plambda function (`This` anaphor, captured by `p!` during `job` environment creation) to the arguments it was passed.
 ```
 : (do 3 (ptest1 3))
 -> 9
@@ -378,7 +383,7 @@ But I will show you how to use LOLFORTH. First we need a forth image to work wit
 6                       # prints 6
 -> ok                   # and we're done
 ```
-So what happened? Let's do it again in slow-motion. First we push three numbers onto the parameter stack.
+So what happened? Let's do it again in slow-motion. First we push two numbers onto the parameter stack.
 ```
 : (go-forth F 2 3)
 -> 3
@@ -528,3 +533,13 @@ And now for the grand finale!
 :exploding_head:
 
 There's a bunch of other code that I'll quickly mention. Macros to write forth primitives so we can bootstrap a forth standard library and continue adding new words in forth, some fancy lisp macros to convert lisp functions to forth words so we don't have to do too much work, code to install the primitives and standard library to the forth image, etc.
+
+The best part?
+```
+: F
+-> ... giant wall of text ...
+
+: (pretty F)
+-> ... another giant wall of spaced out text ...
+```
+Now scroll up a bit- as mentioned before the _entire_ FORTH system is one giant `job` environment / closure. Even better - the FORTH `dict` is a singly linked list of these 'job' environments / closures. One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl: :rofl: :rofl:
