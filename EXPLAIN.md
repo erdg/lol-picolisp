@@ -9,7 +9,7 @@ The file starts with a few utility functions.
 : (macro! (let X _(+ 2 3) (* X X))) )
 -> 25
 ```
-It uses a naive code walker to look for underscore characters and insert the result of evaluating the following list in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but it was `list`ed, so the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though lol.
+It uses a naive code walker to look for underscore characters and insert the result of evaluating the following list in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but it was `list`ed, so the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
 
 `groups-of` (`group` from PG's On Lisp) and `flat` (the PicoLisp version of
 `flatten` from On Lisp) are pretty self explanatory.
@@ -183,9 +183,9 @@ A `p!` form is a simply a `@`-args function (closure?) that contains a `job` env
 : (ptest 4 5)
 -> 53
 ```
-`with-p!` is a PL `macro` that "expands" into a `let` statement. The let-bindings are created by `with-p!-env`. `with-p!-env` uses the `make` / `link` PL idiom to build a list of variables gathered from the supplied plambda form. `with-p!-env` also injects the anaphors `Self` and `setp` so we can conveniently access and modify the plambda closure.
+`with-p!` is a PL `macro` that "expands" into a `let` statement. The let-bindings are created by `with-p!-env`. `with-p!-env` uses the `make` / `link` idiom to build a list of variables gathered from the supplied plambda form. `with-p!-env` also injects the anaphors `Self` and `setp` so we can conveniently access and modify the plambda closure.
 
-In case you haven't read the entirety of On Lisp and Let Over Lambda, here's the crash course in Anaphora.
+In case you haven't read the entirety of On Lisp and Let Over Lambda yet, here's the crash course in Anaphora.
 
 > In natural language, an anaphor is an expression which refers back in the conversation. The most common anaphor in English is probably “it,” as in “Get the wrench and put it on the table.” Anaphora are a great convenience in everyday language [...] but they don’t appear much in programming languages. For the most part, this is good. Anaphoric expressions are often genuinely ambiguous, and present-day programming languages are not designed to handle ambiguity.
 >
@@ -356,7 +356,7 @@ And now we can play with pandoric rectangles!
 With all the pieces of our new closure / object oriented programming system in place, we're ready to build a toy language.
 
 ### LOLFORTH
-Unfortunately, I'm not going to explain the LOLFORTH implementation as thoroughly as the previous code. The final chapter of [Let Over Lambda](https://letoverlambda.com/) does it better than I ever could. If you've enjoyed this, consider buying Doug's Book. It's super cool. I'll leave you with a teaser quote that offers a brief explanation of the forth programming language. The text has been [tweaked] as needed to reflect the PicoLisp version we are discussing here.
+Unfortunately, I'm not going to explain the LOLFORTH implementation as thoroughly as the previous code. The final chapter of [Let Over Lambda](https://letoverlambda.com/) is just that. If you've enjoyed this so far, consider buying Doug's Book. It's super cool. I'll leave you with a teaser quote that offers a brief explanation of the forth programming language. The text has been [tweaked] as needed to reflect the PicoLisp version we are discussing here.
 
 > One of the characteristic features of forth is its direct access to the stack data structures used by your program both to pass parameters to subroutines and to keep track of your execution because - unlike most programming languages - it separates these two uses of the stack data structure into two stacks you can fool with. In a typical C implementation, the parameters of a function call and its so-called _return address_ are stored it a single, variable-sized _stack frame_ for every function invocation. In forth, they are two different stacks called the parameter stack and the return stack, which are represented as our abstract registers `pstack` and `rstack`. We use the  PicoLisp functions `push` and `pop`, meaning these stacks are implemented with cons cell linked lists [...].
 >
@@ -366,4 +366,165 @@ Unfortunately, I'm not going to explain the LOLFORTH implementation as thoroughl
 >
 > -- Let Over Lambda (p. 287-288)
 
+But I will show you how to use LOLFORTH. First we need a forth image to work with, created with `new-forth`.
+```
+: (def 'F (new-forth))
+-> F
+```
+`go-forth` is the macro that drives our interaction with our forth interpreter.
+```
+: (go-forth F           # the forth image
+      2 3 * print )     # the forth code
+6                       # prints 6
+-> ok                   # and we're done
+```
+So what happened? Let's do it again in slow-motion. First we push three numbers onto the parameter stack.
+```
+: (go-forth F 2 3)
+-> 3
+```
+Remember that our forth image `F` is a massive plambda closure, so we can inspect its content.
+```
+: (F "getp" 'pstack)
+-> (3 2)
+```
+Just as we expected.
+```
+: (go-forth F *)
+-> ok
 
+: (F "getp" 'pstack)
+-> (6)
+```
+The forth word `*` pops two parameters from the pstack, multiplies them and pushes the result back on the pstack.
+```
+: (get-forth-thread F '*)
+-> (NIL (push 'pstack (* (pop 'pstack) (pop 'pstack))) (setq pc (cdr pc)))
+
+: (go-forth F print)
+6
+-> ok
+```
+The function `get-forth-thread` will return the code that is executed when the given forth word is encountered. `get-forth-words` will list the forth words in the current forth image's `dict`.
+```
+: (get-forth-words F)
+-> (tuck 2drop nip ...)
+```
+New forth words can be added to a forth image with the words `:`, `;` and `name`.
+```
+: (go-forth F
+   : dup * ; 'square name )
+-> ok
+
+: (go-forth F 8 square print)
+64
+-> ok
+
+: (go-forth F
+   : square square ; 'quartic name )
+-> ok
+
+: (go-forth F
+   8 quartic print )
+4096
+-> ok
+
+: (pretty (get-forth-thread F 'square))
+
+# slightly reformatted for easier parsing
+(
+   (NIL                             # 'dup' thread
+      (push 'pstack (car pstack))
+      (setq pc (cdr pc)) )
+   (NIL                             # '*' thread
+      (push 'pstack
+         (* (pop 'pstack) (pop 'pstack)) )
+      (setq pc (cdr pc)) ) )
+
+: (pretty (get-forth-thread F 'quartic))
+(
+   (                                            # first 'square' thread
+      (NIL
+         (push 'pstack (car pstack))
+         (setq pc (cdr pc)) )
+      (NIL
+         (push 'pstack
+            (* (pop 'pstack) (pop 'pstack)) )
+         (setq pc (cdr pc)) ) )
+   (                                            # second 'square' thread
+      (NIL
+         (push 'pstack (car pstack))
+         (setq pc (cdr pc)) )
+      (NIL
+         (push 'pstack
+            (* (pop 'pstack) (pop 'pstack)) )
+         (setq pc (cdr pc)) ) ) )
+```
+The flow of code/data through our forth interpreter is something like the following.
+```
+   # 'go-forth' is a convenience macro wrapper
+
+   (go-forth F . Words)                       <---
+                                                  \
+   # the forth image is a plambda form            |
+                                                  |
+   (F Word)                                       |
+                                                  |
+   # which looks up the forth word in the         |
+   # 'dict'                                       |
+                                                  | loop until program counter
+   (forth-lookup Word)                            | and the return stack are both
+                                                  | empty
+   # which triggers either                        |
+                                                  |
+   (handle-found) | (handle-not-found)            |
+                                                  |
+   # which either compiles in a forth word        |
+   # to the current thread and/or continues       |
+   # on with forth execution                      |
+                                                  /
+   (forth-compile-in) | (forth-inner-interpreter)
+```
+
+And now for the grand finale!
+```
+: (go-forth F
+   : begin
+         dup 1 < if drop exit then
+         dup print
+         1 -
+      again
+   ; 'countdown name )
+-> ok
+
+: (go-forth F 5 countdown)
+5
+4
+3
+2
+1
+-> ok
+
+# same but different
+: (go-forth F
+   : begin
+         dup 1 >= if
+            dup print
+            1 -
+            |_ swap _| again
+         then
+      drop
+   ; 'countdown-for-teh-hax0rz name )
+-> ok
+
+: (go-forth F 5 countdown-for-teh-hax0rz)
+5
+4
+3
+2
+1
+-> ok
+```
+:exploding_head:
+
+There's a bunch of other code that I'll quickly mention. Macros to write forth primitives so we can bootstrap a forth standard library and continue adding new words in forth, some fancy lisp macros to convert lisp functions to forth words so we don't have to do too much work, code to install the primitives and standard library to the forth image, etc.
