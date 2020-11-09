@@ -313,9 +313,6 @@
 # -> 600
 ###
 
-# (load "pandoric-tests.l")
-# (pandoric-tests)
-
 ###### LOLFORTH
 
 # The rest of this file defines a simple forth, implemented with the ridiculous
@@ -629,28 +626,6 @@
          (while (setq D(D "getp" 'Prev))
             (link (D "getp" 'Name)) ) ) ) )
 
-### TESTS
 
-(let F (new-forth)
-   (go-forth F 1 2 3 + +)
-   (test (6) (F "getp" 'pstack))
-   (F "setp" 'pstack NIL)
-   (go-forth F 14 'N !)
-   (F "setp" 'pstack NIL)
-   (go-forth F 'N @)
-   (test (14) (F "getp" 'pstack))
-   (F "setp" 'pstack NIL)
-   (test 'ok
-      (go-forth F
-         : begin
-            dup 1 >= if
-               dup print
-               1 -
-               |_ swap _| again
-               then
-            drop
-         ; 'countdown-for-teh-hax0rz name
-         '"countdown-for-teh-hax0rz coded in forth!" print
-         4 countdown-for-teh-hax0rz ) )
-   (t (prinl "LOLFORTH -- PASSED ALL TESTS"))
-)
+(load "tests.l")
+(lol-tests)
