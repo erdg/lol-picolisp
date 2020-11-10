@@ -1,4 +1,6 @@
-## The Gist of It
+# Explanation Station
+
+#### The Gist
 Layers and layers of macros that implement a lispy version of the FORTH programming language, the internals of which are completely ridiculous.
 
 ### Utilities
