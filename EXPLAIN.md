@@ -11,7 +11,7 @@ The file starts with a few utility functions.
 : (macro! (let X _(+ 2 3) (* X X))) )
 -> 25
 ```
-It uses a naive code walker to look for underscore characters and insert the result of evaluating the following list in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but it was `list`ed, so the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
+It uses a naive code walker to look for underscore characters, evaluate the following atom or list and insert the result in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but because it was `list`ed, the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
 
 `groups-of` (`group` from PG's On Lisp) and `flat` (the PicoLisp version of
 `flatten` from On Lisp) are pretty self explanatory.
