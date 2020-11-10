@@ -22,15 +22,20 @@ It uses a naive code walker to look for underscore characters, evaluate the foll
 -> (1 2 3 4 5 6)
 ```
 
-The function `\\` is the [sharp-backquote](https://letoverlambda.com/index.cl/guest/chap6.html#sec_2)
-read macro from Let Over Lambda.
+`\\` is the [sharp-backquote](https://letoverlambda.com/index.cl/guest/chap6.html#sec_2)
+read macro from Let Over Lambda. It is named `\\` in PicoLisp because obviously `#` and backquote are out, and who knew you could name a function `\\`?!
+
+>Another way to think about sharp-backquote is that it is to list interpolation as the [`text`] function is to string interpolation. Just as [`text`] lets us use a template with slots that are to be filled with the values of separate arguments, sharp-backquote lets us separate the structure of the list interpolation from the values we want to splice in.
+>
+> -- Let Over Lambda (p. 158)
+
 ```
-: (macro!
-     '(let _(mapcan '`(\\ (@1 @2)) '(A B C) (1 2 3))
-        (do-something) ) )
--> (let (A 1 B 2 C 3) (do something))
+: (mapcar '`(\\ (@1 'empty)) '(Var1 Var2 Var3))
+-> ((Var1 'empty) (Var2 'empty) (Var3 'empty))
+
+: ('`(\\ (((@2)) @3 (@1 @1))) 'A 'B 'C)
+-> (((B)) C (A A))
 ```
-While this is a convoluted example for such a simple result, `\\` allows some very cool techniques used in LOLFORTH later.
 
 ### Dlambda
 > Dlambda is designed to be passed a [transient] symbol as the first argument. Depending on which [transient] symbol was used, dlambda will execute a corresponding piece of code.
