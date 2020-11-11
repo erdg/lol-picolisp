@@ -7,10 +7,12 @@ Layers and layers of macros that implement a lispy version of the FORTH programm
 The file starts with a few utility functions.
 
 'macro!' offers a non-splicing complement to `^` in 'macro'. NOTE - this has nothing to do with the impressive `defmacro!` from Let Over Lambda.
+
 ```
 : (macro! (let X _(+ 2 3) (* X X))) )
 -> 25
 ```
+
 It uses a naive code walker to look for underscore characters, evaluate the following atom or list and insert the result in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but because it was `list`ed, the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
 
 `groups-of` (`group` from [On Lisp](http://www.paulgraham.com/onlisp.html) and `flat` are pretty self explanatory.
@@ -119,10 +121,10 @@ The [Pandoric Macros](https://letoverlambda.com/index.cl/guest/chap6.html#sec_7)
 are some of my favorite from Let Over Lambda.
 
 ### plambda
-`p!` is the PL translation of `plambda`. A plambda is basically a "dlambda with state", with a little "interclosure protocol" bolted on.
+`p!` is the PL translation of `plambda`. A plambda is basically a "dlambda with state", with a little "inter-closure protocol" bolted on.
 
 >#### a note on implementation differences
->PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we must use PicoLisp's `job` environments to mimic lexical scope with indefinate extent, as found in Common Lisp. But when it comes down to it, both `plambda` and `p!` create reusable chunks of code with lexical variables that can be exported to the global environment and consumed as needed via `with-pandoric` / `with-p!` and `with-p!s`. Also note that `:keywords` are used in Common Lisp to dispatch different plamda actions. PicoLisp doesn't have those, so transient symbols are used instead, eg. `"keyword"`.
+>PicoLisp and Common Lisp are very different languages. Due to the differences of scoping / binding and extent, we use PicoLisp's `job` environments to mimic lexical scope and indefinate extent, as found in Common Lisp. `:keyword` symbols are used in Common Lisp to dispatch different plamda actions. PicoLisp doesn't have those, so `"transient"` symbols are used instead.
 
 ```
 # two different ways to p!
