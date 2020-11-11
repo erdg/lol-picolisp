@@ -12,7 +12,7 @@ The file starts with a few utility functions.
 -> 25
 ```
 
-It uses a naive code walker to look for underscore characters, evaluate the following atom or list, and insert the result in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but because it was `list`ed, the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
+It uses a naive code walker to look for underscore characters, evaluate the following atom or list, and insert the result in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but because it was `list`ed, the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :smirk:
 
 `groups-of` (`group` from [On Lisp](http://www.paulgraham.com/onlisp.html)) and `flat` are pretty self explanatory.
 ```
@@ -573,4 +573,4 @@ The best part?
 : (pretty F)
 -> ... another giant wall of spaced out text ...
 ```
-Now scroll up a bit... and scroll some more - as mentioned before, the _entire_ LOLFORTH system is one giant `job` environment / closure. Even better - the forth `dict` is a singly linked list of these job environments / closures (created by `typ!`). One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl: :rofl: :rofl:
+Now scroll up a bit... and scroll some more - as mentioned before, the _entire_ LOLFORTH system is one giant `job` environment / closure. Even better - the forth `dict` is a singly linked list of these job environments / closures (created by `typ!`). One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl:
