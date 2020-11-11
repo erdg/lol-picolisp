@@ -1,6 +1,5 @@
 # Explanation Station
 
-#### The Gist
 Layers and layers of macros that implement a lispy version of the FORTH programming language, the internals of which are completely ridiculous.
 
 ### Utilities
@@ -13,9 +12,9 @@ The file starts with a few utility functions.
 -> 25
 ```
 
-It uses a naive code walker to look for underscore characters, evaluate the following atom or list and insert the result in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but because it was `list`ed, the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
+It uses a naive code walker to look for underscore characters, evaluate the following atom or list, and insert the result in its place. It does this by transforming `_( ... )` to `^(list ( ... ))` and passing it to `macro`. `macro` then splices _that_ in, but because it was `list`ed, the net effect is 'placing' and not 'splicing'. So `macro!` rewrites the code that is passed to it so that `macro` understands it, all for a bit of syntax sugar. Sure makes the code look sweet though :rofl:
 
-`groups-of` (`group` from [On Lisp](http://www.paulgraham.com/onlisp.html) and `flat` are pretty self explanatory.
+`groups-of` (`group` from [On Lisp](http://www.paulgraham.com/onlisp.html)) and `flat` are pretty self explanatory.
 ```
 : (groups-of 2 '(1 2 3 4 5 6))
 -> ((1 2) (3 4) (5 6))
@@ -25,7 +24,7 @@ It uses a naive code walker to look for underscore characters, evaluate the foll
 ```
 
 `\\` is the [sharp-backquote](https://letoverlambda.com/index.cl/guest/chap6.html#sec_2)
-read macro from Let Over Lambda. It is named `\\` in PicoLisp because obviously `#` and backquote are out, and who knew you could name a function `\\`?!
+read macro from Let Over Lambda. It is named `\\` in PicoLisp because `#`` is obviously out. And who knew you could name a function `\\`?
 
 >Another way to think about sharp-backquote is that it is to list interpolation as the [`text`] function is to string interpolation. Just as [`text`] lets us use a template with slots that are to be filled with the values of separate arguments, sharp-backquote lets us separate the structure of the list interpolation from the values we want to splice in.
 >
