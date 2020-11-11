@@ -24,7 +24,7 @@ It uses a naive code walker to look for underscore characters, evaluate the foll
 ```
 
 `\\` is the [sharp-backquote](https://letoverlambda.com/index.cl/guest/chap6.html#sec_2)
-read macro from Let Over Lambda. It is named `\\` in PicoLisp because `#`` is obviously out. And who knew you could name a function `\\`?
+read macro from Let Over Lambda. It is named `\\` in PicoLisp because obviously `#` and backquote are out. And who knew you could name a function `\\`?
 
 >Another way to think about sharp-backquote is that it is to list interpolation as the [`text`] function is to string interpolation. Just as [`text`] lets us use a template with slots that are to be filled with the values of separate arguments, sharp-backquote lets us separate the structure of the list interpolation from the values we want to splice in.
 >
