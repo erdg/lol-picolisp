@@ -145,7 +145,7 @@ are some of my favorite from Let Over Lambda.
 : (pretty ptest2)
 -> (@ ...)
 ```
-A `p!` form is a simply a `@`-args function (closure?) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the plambda function (`This` anaphor, captured by `p!` during `job` environment creation) to the arguments it was passed.
+A `p!` form is a simply a `@`-args function (closure) that contains a `job` environment whose variables can be accessed via `"getp"` and `"setp"`. `d!` is responsible for dispatching on variable access, or defaults to applying the plambda function (`This` anaphor) to the arguments it was passed.
 ```
 : (do 3 (ptest1 3))
 -> 9
@@ -195,7 +195,7 @@ A `p!` form is a simply a `@`-args function (closure?) that contains a `job` env
 : (ptest 4 5)
 -> 53
 ```
-`with-p!` is a PL `macro` that "expands" into a `let` statement. The let-bindings are created by `with-p!-env`. `with-p!-env` uses the `make` / `link` idiom to build a list of variables gathered from the supplied plambda form. `with-p!-env` also injects the anaphors `Self` and `setp` so we can conveniently access and modify the plambda closure.
+`with-p!` is a PL `macro` that "expands" into a `let` statement. The let-bindings are created by `with-p!-env`. `with-p!-env` uses the `make` / `link` idiom to build a list of variables gathered from the supplied plambda form. `with-p!-env` also captures the anaphors `Self` and `setp` so we can conveniently access and modify the plambda closure.
 
 In case you haven't read the entirety of On Lisp and Let Over Lambda yet, here's the crash course in Anaphora.
 
@@ -282,13 +282,13 @@ Note that because `setp` expects the anaphor `Self` to be in its calling environ
 : (ptest2 1)            # increment conte of ptest2
 -> 60
 ```
-Like `with-p!` and `with-p!-env`, the heavy lifting for `with-p!s` is done by the function `with-p!s-env`. `with-p!s-env` processes its args to create a giant let binding with a bunch of handy anaphors included. It mostly serves as an example of what can be done with anaphors and how we can use lisp to create our own programming constructs with any behavior we can imagine. The `with-p!s-env` source code has helpful comments, if you're interested in the specifics of the implementation.
+Like `with-p!` and `with-p!-env`, the heavy lifting for `with-p!s` is done by the function `with-p!s-env`. `with-p!s-env` processes its args to create a giant let binding with a bunch of handy anaphors included. It mostly serves as an example of what can be done with anaphors and how we can use lisp to create our own programming constructs with _any_ behavior we can imagine. The `with-p!s-env` source code has helpful comments, if you're interested in the specifics of the implementation.
 
 
 ### pm
-Let's be real here - underneath the plambdas and the macros and the anaphora, what we're really doing is creating yet another way of object oriented programming in lisp. Just what the world needs! Let's take it all the way.
+Let's be real here - underneath all the plambdas and macros and anaphora, what we're really doing is creating yet another way of object oriented programming in lisp. Just what the world needs! Let's take it all the way.
 
-`pm` is the PL translation `defpan`. It allows to define pandoric methods that operate on any plambda closure that exposes the right variables. Let's say we have an important calculation that needs to be periodically done on our counters.
+`pm` is the PL translation of `defpan`. It allows to define pandoric methods that operate on any plambda closure that exposes the right variables. Let's say we have an important calculation that needs to be done with our counters.
 ```
 : (pm important-calculation () (Cnt) (* Cnt 7))
 -> important-calculation
@@ -299,7 +299,7 @@ Let's be real here - underneath the plambdas and the macros and the anaphora, wh
 : (important-calculation ptest2)
 -> 420
 ```
-Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form. Note that `pm` is not a true nested macro because the inner `macro` call is evaluated when it is placed  in the outer `macro`s "expansion".
+Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form.
 
 ### typ!
 `typ!` allows to create new (proto)types of pandoric objects.
@@ -309,10 +309,11 @@ Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form. Note tha
       X Y DX DY )
 -> p-rectangle
 ```
-`typ!` is a macro-writing macro. Behold the awe-inspiring nested macros in the definition! :exploding_head: `typ!` calls expand into `de` call that is itself a `macro` that, when called, will expand into a plambda form with all the variable slots filled in. This becomes clear when we look at the expansion of the above `(typ! p-rectangle ...)` call.
+`typ!` is a macro-writing macro. Behold the awe-inspiring nested macros in the definition! :exploding_head: `typ!` calls expand into a `de` call that is itself a `macro` that, when called, will expand into a plambda form with all the variable slots filled in. This becomes clear when we look at the expansion of the above `(typ! p-rectangle ...)` call.
 ```
-   # 'typ!' expansion
-   (de p-rectangle (X Y DX DY)
+# 'typ!' expansion
+: (pretty p-rectangle)
+-> ((X Y DX DY)
       (macro!
          (let [X  _ X      # coords
                Y  _ Y
@@ -320,18 +321,16 @@ Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form. Note tha
                DY _ DY]    # height
             (*p! () (X Y DX DY))) ) )
 ```
-So now we a function `p-rectangle` that when called, creates a rectangle object (which is really just a plambda form). Let's create a p-rectangle.
+
+So now we a macro `p-rectangle` that when called, creates a rectangle object (which is just a plambda form... which is a dlambda, which is just a function that dispatches other functions based on keyword args). Let's create a p-rectangle.
+
 ```
 : (def 'pr1 (p-rectangle 0 0 5 10))
 -> pr1
 ```
-This call expands into
-```
-   (def 'pr1
-      (let [X 0 Y 0 DX 5 DY 10]
-         (*p! () (X Y DX DY)) ) )
-```
-a plambda form (with no `This` function). We can add p-rectangle methods with `pm`.
+
+We can add p-rectangle methods with `pm`.
+
 ```
 : (pm coords () (X Y)
    (list X Y) )
@@ -354,7 +353,9 @@ a plambda form (with no `This` function). We can add p-rectangle methods with `p
    (* 2 (+ DX DY)) )
 -> perimeter
 ```
+
 And now we can play with pandoric rectangles!
+
 ```
 : (move pr1 7 8)
 -> (7 8)
@@ -365,6 +366,7 @@ And now we can play with pandoric rectangles!
 : (area pr1)
 -> 50
 ```
+
 With all the pieces of our new closure / object oriented programming system in place, we're ready to build a toy language.
 
 ### LOLFORTH
