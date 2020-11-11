@@ -39,7 +39,7 @@ read macro from Let Over Lambda. It is named `\\` in PicoLisp because obviously 
 ```
 Please note that the Let Over Lambda exerpts have been [tweaked] to reflect the PicoLisp version we are discussing here.
 
-### Dlambda
+### dlambda
 > Dlambda is designed to be passed a [transient] symbol as the first argument. Depending on which [transient] symbol was used, dlambda will execute a corresponding piece of code.
 >
 > -- Let Over Lambda (p. 149)
