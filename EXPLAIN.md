@@ -37,6 +37,7 @@ read macro from Let Over Lambda. It is named `\\` in PicoLisp because obviously 
 : ('`(\\ (((@2)) @3 (@1 @1))) 'A 'B 'C)
 -> (((B)) C (A A))
 ```
+Please note that the Let Over Lambda exerpts have been [tweaked] to reflect the PicoLisp version we are discussing here.
 
 ### Dlambda
 > Dlambda is designed to be passed a [transient] symbol as the first argument. Depending on which [transient] symbol was used, dlambda will execute a corresponding piece of code.
@@ -309,7 +310,7 @@ Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form.
       X Y DX DY )
 -> p-rectangle
 ```
-`typ!` is a macro-writing macro. Behold the awe-inspiring nested macros in the definition! :exploding_head: `typ!` calls expand into a `de` call that is itself a `macro` that, when called, will expand into a plambda form with all the variable slots filled in. This becomes clear when we look at the expansion of the above `(typ! p-rectangle ...)` call.
+`typ!` is a macro-writing macro. Behold the awe-inspiring _nested_ macros in the definition! :exploding_head: `typ!` calls expand into a `de` call that is itself a `macro` that, when called, will expand into a plambda form with all the variable slots filled in. This becomes clear when we look at the expansion of the above `(typ! p-rectangle ...)` call.
 ```
 # 'typ!' expansion
 : (pretty p-rectangle)
@@ -322,7 +323,7 @@ Internally, `pm` is a macro that wraps a `with-p!` form in a `de` form.
             (*p! () (X Y DX DY))) ) )
 ```
 
-So now we a macro `p-rectangle` that when called, creates a rectangle object (which is just a plambda form... which is a dlambda, which is just a function that dispatches other functions based on keyword args). Let's create a p-rectangle.
+So now we have a macro `p-rectangle` that when called, creates a rectangle object (which is a plambda form... which is a dlambda form, which is just a function that dispatches other functions based on keyword args). Let's create a p-rectangle.
 
 ```
 : (def 'pr1 (p-rectangle 0 0 5 10))
@@ -370,9 +371,11 @@ And now we can play with pandoric rectangles!
 With all the pieces of our new closure / object oriented programming system in place, we're ready to build a toy language.
 
 ### LOLFORTH
-Unfortunately, I'm not going to explain the LOLFORTH implementation as thoroughly as the previous code. The final chapter of [Let Over Lambda](https://letoverlambda.com/) is just that. If you've enjoyed this so far, consider buying Doug's Book. It's super cool. I'll leave you with a teaser quote that offers a brief explanation of the forth programming language. The text has been [tweaked] as needed to reflect the PicoLisp version we are discussing here.
+I'm not going to explain the LOLFORTH implementation as thoroughly as the previous code. The final chapter of [Let Over Lambda](https://letoverlambda.com/) is just that. If you've enjoyed this so far, consider buying Doug's Book. It's super cool.
 
-> One of the characteristic features of forth is its direct access to the stack data structures used by your program both to pass parameters to subroutines and to keep track of your execution because - unlike most programming languages - it separates these two uses of the stack data structure into two stacks you can fool with. In a typical C implementation, the parameters of a function call and its so-called _return address_ are stored it a single, variable-sized _stack frame_ for every function invocation. In forth, they are two different stacks called the parameter stack and the return stack, which are represented as our abstract registers `pstack` and `rstack`. We use the  PicoLisp functions `push` and `pop`, meaning these stacks are implemented with cons cell linked lists [...].
+Here's a brief explanation of the forth programming language.
+
+> One of the characteristic features of forth is its direct access to the stack data structures used by your program both to pass parameters to subroutines and to keep track of your execution because - unlike most programming languages - it separates these two uses of the stack data structure into two stacks you can fool with. In a typical C implementation, the parameters of a function call and its so-called _return address_ are stored it a single, variable-sized _stack frame_ for every function invocation. In forth, they are two different stacks called the parameter stack and the return stack, which are represented as our abstract registers `pstack` and `rstack`. We use the  [PicoLisp functions] `push` and `pop`, meaning these stacks are implemented with cons cell linked lists [...].
 >
 > The abstract register `pc` is an abbreviation for _program counter_, a pointer to the code we are currently executing. [...]
 >
@@ -380,29 +383,37 @@ Unfortunately, I'm not going to explain the LOLFORTH implementation as thoroughl
 >
 > -- Let Over Lambda (p. 287-288)
 
-But I will show you how to use LOLFORTH. First we need a forth image to work with, created with `new-forth`.
+To get started with LOLFORTH, we need a forth image to work with. This is created with `new-forth`.
 ```
 : (def 'F (new-forth))
 -> F
 ```
+
 `go-forth` is the macro that drives our interaction with our forth interpreter.
+
 ```
 : (go-forth F           # the forth image
-      2 3 * print )     # the forth code
+      2 3 * print )     # the forth code (postfix notation, super duper backwards and confusing)
 6                       # prints 6
 -> ok                   # and we're done
 ```
+
 So what happened? Let's do it again in slow-motion. First we push two numbers onto the parameter stack.
+
 ```
 : (go-forth F 2 3)
 -> 3
 ```
+
 Remember that our forth image `F` is a massive plambda closure, so we can inspect its content.
+
 ```
 : (F "getp" 'pstack)
 -> (3 2)
 ```
+
 Just as we expected.
+
 ```
 : (go-forth F *)
 -> ok
@@ -410,7 +421,9 @@ Just as we expected.
 : (F "getp" 'pstack)
 -> (6)
 ```
+
 The forth word `*` pops two parameters from the pstack, multiplies them and pushes the result back on the pstack.
+
 ```
 : (get-forth-thread F '*)
 -> (NIL (push 'pstack (* (pop 'pstack) (pop 'pstack))) (setq pc (cdr pc)))
@@ -419,12 +432,16 @@ The forth word `*` pops two parameters from the pstack, multiplies them and push
 6
 -> ok
 ```
+
 The function `get-forth-thread` will return the code that is executed when the given forth word is encountered. `get-forth-words` will list the forth words in the current forth image's `dict`.
+
 ```
 : (get-forth-words F)
 -> (tuck 2drop nip ...)
 ```
+
 New forth words can be added to a forth image with the words `:`, `;` and `name`.
+
 ```
 : (go-forth F
    : dup * ; 'square name )
@@ -474,9 +491,12 @@ New forth words can be added to a forth image with the words `:`, `;` and `name`
             (* (pop 'pstack) (pop 'pstack)) )
          (setq pc (cdr pc)) ) ) )
 ```
+
 The flow of code/data through our forth interpreter is something like the following.
+
 ```
-   # 'go-forth' is a convenience macro wrapper
+   # 'go-forth' is a convenience macro wrapper that takes care of quoting args and
+   # for-loops through the words, calling the forth image on each word
 
    (go-forth F . Words)                       <---
                                                   \
@@ -500,7 +520,8 @@ The flow of code/data through our forth interpreter is something like the follow
    (forth-compile-in) | (forth-inner-interpreter)
 ```
 
-And now for the grand finale!
+And now for the grand finale! :tada:
+
 ```
 : (go-forth F
    : begin
@@ -539,9 +560,10 @@ And now for the grand finale!
 1
 -> ok
 ```
+
 You are now an expert at lisp _and_ forth meta-programming :exploding_head:
 
-There's a bunch of other code that I'll quickly mention. Macros to write forth primitives so we can bootstrap a forth standard library and continue adding new words in forth, some fancy lisp macros to convert lisp functions to forth words so we don't have to do too much work, code to install the primitives and standard library to the forth image, etc.
+There's a bunch of other code that I'll quickly mention. Macros to write forth primitives so we can bootstrap a forth standard library and continue adding new words in forth, some fancy lisp macros to convert lisp functions to forth words so we don't have to do too much work (remember the cool use of the sharp-backquote read macro I mentioned?), code to install the primitives and standard library to the forth image, etc.
 
 The best part?
 ```
@@ -551,4 +573,4 @@ The best part?
 : (pretty F)
 -> ... another giant wall of spaced out text ...
 ```
-Now scroll up a bit... and scroll some more - as mentioned before, the _entire_ LOLFORTH system is one giant `job` environment / closure. Even better - the forth `dict` is a singly linked list of these job environments / closures. One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl: :rofl: :rofl:
+Now scroll up a bit... and scroll some more - as mentioned before, the _entire_ LOLFORTH system is one giant `job` environment / closure. Even better - the forth `dict` is a singly linked list of these job environments / closures (created by `typ!`). One forth word points to the previous, chains of words nested to hell and back, held together by a bunch of ridiculous macros. And somehow it all works. :rofl: :rofl: :rofl:
